@@ -23,7 +23,9 @@ def select_player_by_game():
 
     # 試合選択
     game_options = {row["MATCHUP"]: row["GAME_ID"] for _, row in games_on_date.iterrows()}
-    selected_game = st.selectbox("Select a game:", list(game_options.keys()))
+    # "vs" を含むキーだけを抽出
+    filtered_keys = [key for key in game_options.keys() if "vs" in key]
+    selected_game = st.selectbox("Select a game:", filtered_keys)
     if not selected_game:
         st.stop()
 

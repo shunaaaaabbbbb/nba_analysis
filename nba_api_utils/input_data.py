@@ -73,13 +73,15 @@ def select_player_by_game():
         st.stop()
 
     # Step 2: 日付の選択
-    date = st.text_input("Enter Game Date (YYYY-MM-DD):", "")
+    date = st.date_input("Enter Game Date (YYYY-MM-DD):")
     if not date:
         st.stop()
+    # datetime.date を文字列に変換
+    formatted_date = date.strftime("%Y-%m-%d")
 
     # Step 3: 試合ログの取得
     try:
-        games_on_date = get_game_log(season, date)
+        games_on_date = get_game_log(season, formatted_date)
         if games_on_date.empty:
             st.warning("No games found for the given date.")
             st.stop()
@@ -89,7 +91,9 @@ def select_player_by_game():
 
     # Step 4: 試合の選択
     game_options = {row["MATCHUP"]: row["GAME_ID"] for _, row in games_on_date.iterrows()}
-    selected_game = st.selectbox("Select a game:", list(game_options.keys()))
+    # "vs" を含むキーだけを抽出
+    filtered_keys = [key for key in game_options.keys() if "vs" in key]
+    selected_game = st.selectbox("Select a game:", filtered_keys)
     if not selected_game:
         st.stop()
 

@@ -38,11 +38,11 @@ def select_player_by_game():
         st.stop()
 
     # プレイヤー選択
-    players_on_team = ["Player A", "Player B"]  # ここは仮。APIで取得するロジックを追加。
+    players_on_team = game.get_player_names(game_id, selected_team)
     selected_player_name = st.selectbox("Select a player:", players_on_team)
     if not selected_player_name:
         st.stop()
 
     player = Player(selected_player_name)
-
+    
     return game_id, player.id, season

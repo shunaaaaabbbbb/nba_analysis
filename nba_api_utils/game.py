@@ -30,3 +30,19 @@ class Game:
         boxscore = boxscoretraditionalv2.BoxScoreTraditionalV2(game_id=game_id)
         game_stats = boxscore.get_data_frames()[0]
         return game_stats["TEAM_ABBREVIATION"].unique()
+    
+    
+    def get_player_names(self, game_id: int, team: str):
+        """試合とチームを入力して、そのチームに属し、その試合に出場した選手のリストを返す
+
+        Args:
+            game_id (int): 試合のID
+            team (str): チーム名
+            
+        Returns:
+            _type_: _description_
+        """
+        boxscore = boxscoretraditionalv2.BoxScoreTraditionalV2(game_id=game_id)
+        game_stats = boxscore.get_data_frames()[0]
+        player_names = game_stats[game_stats["TEAM_ABBREVIATION"] == team]["PLAYER_NAME"]
+        return player_names

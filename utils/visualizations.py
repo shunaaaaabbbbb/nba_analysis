@@ -3,7 +3,7 @@ from nba_api.stats.endpoints import shotchartdetail
 import streamlit as st
 
 class Visualizer:
-    def __init__(self, player_id, game_id, season):
+    def __init__(self, game_id, player_id, season):
         self.player_id = player_id
         self.game_id = game_id
         self.season = season
@@ -18,6 +18,7 @@ class Visualizer:
             context_measure_simple='FGA'
         )
         self.shot_chart_data = response.get_data_frames()[0]
+        st.write(self.shot_chart_data)
 
     @staticmethod
     def draw_court(ax=None, color='black', lw=2):

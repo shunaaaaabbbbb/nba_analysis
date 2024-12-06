@@ -45,4 +45,4 @@ def select_player_by_game():
 
     player = Player(selected_player_name)
     
-    return game_id, player.id, season
+    return game_id, player.id, season, selected_player_name

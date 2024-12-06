@@ -45,4 +45,4 @@ class Game:
         boxscore = boxscoretraditionalv2.BoxScoreTraditionalV2(game_id=game_id)
         game_stats = boxscore.get_data_frames()[0]
         player_names = game_stats[game_stats["TEAM_ABBREVIATION"] == team]["PLAYER_NAME"]
-        return player_names
+        return player_names.sort_values().tolist()

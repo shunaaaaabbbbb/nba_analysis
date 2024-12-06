@@ -56,8 +56,8 @@ class Visualizer:
         ax.set_facecolor('black')
 
         # 成功と失敗のシュートをプロット
-        ax.scatter(x_made, y_made, c='skyblue', alpha=1, label='Made Shot', s=50)
-        ax.scatter(x_missed, y_missed, c='salmon', alpha=1, label='Missed Shot', s=50)
+        ax.scatter(x_made, y_made, c='turquoise', alpha=1, label='Made Shot', s=100)
+        ax.scatter(x_missed, y_missed, c='deeppink', alpha=1, label='Missed Shot', s=100)
 
         # コートを描画
         self.draw_court(ax=ax, color='white')

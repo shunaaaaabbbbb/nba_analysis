@@ -10,7 +10,5 @@ game_id, player_id, season = select_player_by_game()
 # 選択結果の表示
 if game_id:
     visualizer = Visualizer(player_id, game_id, season)
-    
-    # データを取得してプロット
     visualizer.fetch_shot_chart_data()
     visualizer.plot_shot_chart()

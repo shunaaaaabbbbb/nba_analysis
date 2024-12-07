@@ -3,11 +3,7 @@ import streamlit as st
 from datetime import timedelta
 
 class Visualizer:
-    def __init__(self, game_id, player_id, season, player_name, shot_chart_data, game, date):
-        self.player_id = player_id
-        self.game_id = game_id
-        self.season = season
-        self.player_name = player_name
+    def __init__(self, shot_chart_data, game, date):
         self.shot_chart_data = shot_chart_data
         self.game = game
         self.date = date
@@ -34,7 +30,7 @@ class Visualizer:
         for element in court_elements:
             ax.add_patch(element)
 
-    def plot_shot_chart(self):
+    def plot_shot_chart_of_player(self, player_name):
         if self.shot_chart_data is None:
             raise ValueError("Shot chart data is not fetched. Call fetch_shot_chart_data() first.")
 
@@ -64,10 +60,44 @@ class Visualizer:
         ax.set_yticks([])  # y軸の目盛りを非表示
         
         # タイトルと凡例
-        ax.set_title(f"Shot Chart for {self.player_name} ({self.game} : {self.date + timedelta(days=1)})",  color='black', weight = "bold", fontsize = 20)
+        ax.set_title(f"Shot Chart for {player_name} ({self.game} : {self.date + timedelta(days=1)})",  color='black', weight = "bold", fontsize = 20)
         ax.legend(loc='lower right', fontsize = 20)
 
         # Streamlitで表示
         st.pyplot(fig)
 
+    def plot_shot_chart_of_game(self, team_name):
+        if self.shot_chart_data is None:
+            raise ValueError("Shot chart data is not fetched. Call fetch_shot_chart_data() first.")
 
+        # 成功と失敗のシュート座標
+        x_made = self.shot_chart_data[self.shot_chart_data['SHOT_MADE_FLAG'] == 1]['LOC_X']
+        y_made = self.shot_chart_data[self.shot_chart_data['SHOT_MADE_FLAG'] == 1]['LOC_Y']
+        x_missed = self.shot_chart_data[self.shot_chart_data['SHOT_MADE_FLAG'] == 0]['LOC_X']
+        y_missed = self.shot_chart_data[self.shot_chart_data['SHOT_MADE_FLAG'] == 0]['LOC_Y']
+
+        # プロットの準備
+        fig, ax = plt.subplots(figsize=(12, 11))
+        ax.set_facecolor('black')
+
+        # 成功と失敗のシュートをプロット
+        ax.scatter(x_made, y_made, c='turquoise', alpha=1, label='Made Shot', s=100)
+        ax.scatter(x_missed, y_missed, c='deeppink', alpha=1, label='Missed Shot', s=100)
+
+        # コートを描画
+        self.draw_court(ax=ax, color='white')
+
+        # 軸の設定
+        ax.set_xlim(-250, 250)
+        ax.set_ylim(422.5, -47.5)
+
+        # 軸を非表示にする
+        ax.set_xticks([])  # x軸の目盛りを非表示
+        ax.set_yticks([])  # y軸の目盛りを非表示
+        
+        # タイトルと凡例
+        ax.set_title(f"Shot Chart for {team_name} ({self.game} : {self.date + timedelta(days=1)})",  color='black', weight = "bold", fontsize = 20)
+        ax.legend(loc='lower right', fontsize = 20)
+
+        # Streamlitで表示
+        st.pyplot(fig)

@@ -28,3 +28,21 @@ class ShotChart:
             raise ValueError(f"No shot data found")
         return data
 
+
+    def get_season_shot_data(self):
+        """
+        特定のシーズンの全試合のショットチャートデータを取得。
+
+        Returns:
+            DataFrame: シーズン全体のショットチャートデータ
+        """
+        response = shotchartdetail.ShotChartDetail(
+            team_id=0,
+            player_id=self.player_id,
+            season_nullable=self.season,
+            context_measure_simple='FGA'
+        )
+        data = response.get_data_frames()[0]
+        if data.empty:
+            raise ValueError(f"No shot data found for season {self.season}")
+        return data

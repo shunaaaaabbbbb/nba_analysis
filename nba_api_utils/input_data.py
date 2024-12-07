@@ -1,6 +1,7 @@
 from nba_api_utils.player import Player
 from nba_api_utils.game import Game
 import streamlit as st
+from datetime import timedelta
 
 def select_player_by_game():
     # シーズンと日付の入力
@@ -11,6 +12,7 @@ def select_player_by_game():
     date = st.date_input("Enter Game Date (YYYY-MM-DD):")
     if not date:
         st.stop()
+    date = date - timedelta(days=1)
     formatted_date = date.strftime("%Y-%m-%d")
 
     # 試合情報の取得
@@ -45,4 +47,4 @@ def select_player_by_game():
 
     player = Player(selected_player_name)
     
-    return game_id, player.id, season, selected_player_name
+    return game_id, player.id, season, selected_player_name, selected_game, date

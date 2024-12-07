@@ -1,24 +1,16 @@
 import matplotlib.pyplot as plt
-from nba_api.stats.endpoints import shotchartdetail
 import streamlit as st
+from datetime import timedelta
 
 class Visualizer:
-    def __init__(self, game_id, player_id, season):
+    def __init__(self, game_id, player_id, season, player_name, shot_chart_data, game, date):
         self.player_id = player_id
         self.game_id = game_id
         self.season = season
-        self.shot_chart_data = None
-
-    def fetch_shot_chart_data(self):
-        response = shotchartdetail.ShotChartDetail(
-            team_id=0,
-            player_id=self.player_id,
-            season_nullable=self.season,
-            game_id_nullable=self.game_id,
-            context_measure_simple='FGA'
-        )
-        self.shot_chart_data = response.get_data_frames()[0]
-        st.write(self.shot_chart_data)
+        self.player_name = player_name
+        self.shot_chart_data = shot_chart_data
+        self.game = game
+        self.date = date
 
     @staticmethod
     def draw_court(ax=None, color='black', lw=2):
@@ -67,12 +59,13 @@ class Visualizer:
         ax.set_xlim(-250, 250)
         ax.set_ylim(422.5, -47.5)
 
+        # 軸を非表示にする
+        ax.set_xticks([])  # x軸の目盛りを非表示
+        ax.set_yticks([])  # y軸の目盛りを非表示
+        
         # タイトルと凡例
-        ax.set_title(f"Shot Chart for Player ID: {self.player_id} in Game ID: {self.game_id}", color='white')
-        ax.legend(loc='upper right')
-        ax.set_xlabel("Court X-Coordinate", color='white')
-        ax.set_ylabel("Court Y-Coordinate", color='white')
-        ax.tick_params(colors='white')  # 軸のラベル色を白に設定
+        ax.set_title(f"Shot Chart for {self.player_name} ({self.game} : {self.date + timedelta(days=1)})",  color='black', weight = "bold", fontsize = 20)
+        ax.legend(loc='lower right', fontsize = 20)
 
         # Streamlitで表示
         st.pyplot(fig)

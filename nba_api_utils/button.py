@@ -1,6 +1,11 @@
 import streamlit as st
 
 class ButtonHandler:
-    @staticmethod
-    def select_mode():
-        return st.radio("表示モードを選択してください", ["プレイヤー単位", "試合単位"])
+    def __init__(self):
+        self.mode = None
+
+    def select_mode(self):
+        """モードを選択するためのUIを表示し、選択結果を保存"""
+        self.mode = st.radio("表示モードを選択してください", ["プレイヤーのショットチャート", "チームのショットチャート"])
+        return self.mode
+

@@ -1,71 +1,37 @@
+from pandas import DataFrame
 from nba_api.stats.endpoints import shotchartdetail
 
+
 class ShotChart:
-    def __init__(self, season):
-        self.season = season
-
-    def get_game_shot_data(self, game_id, player_id):
+    def __init__(self, season: str):
         """
-        特定の試合のショットチャートデータを取得。
+        初期化: シーズンを指定してインスタンスを作成
 
         Args:
-            game_id (str): 試合ID
-
-        Returns:
-            DataFrame: ショットチャートデータ
+            season (str): 対象のシーズン（例: "2023-24"）
         """
-        response = shotchartdetail.ShotChartDetail(
-            team_id=0,
-            player_id=player_id,
-            season_nullable=self.season,
-            game_id_nullable=game_id,
-            context_measure_simple='FGA'
-        )
-        data = response.get_data_frames()[0]
-        if data.empty:
+        self.season: str = season
 
-            raise ValueError(f"No shot data found")
-        return data
-
-
-    def get_team_game_shot_data(self, game_id, team_id):
+    def _fetch_shot_chart_data(self, team_id: int, player_id: int, game_id: str = None, context_measure: str = 'FGA') -> DataFrame:
         """
-        特定の試合で特定のチームのショットチャートデータを取得。
-
-        Args:
-            game_id (str): 試合ID
-            team_id (str): チームID
-
-        Returns:
-            DataFrame: チームのショットチャートデータ
+        内部メソッド: ショットチャートデータを取得。
         """
         response = shotchartdetail.ShotChartDetail(
             team_id=team_id,
-            player_id=0,  # プレイヤーIDを0にすることでチーム全体のデータを取得
+            player_id=player_id,
             season_nullable=self.season,
             game_id_nullable=game_id,
-            context_measure_simple='FGA'
+            context_measure_simple=context_measure
         )
         data = response.get_data_frames()[0]
         if data.empty:
-            raise ValueError(f"No shot data found for game {game_id} and team {team_id}")
+            raise ValueError(f"No shot data found for season: {self.season}, game_id: {game_id}, team_id: {team_id}, player_id: {player_id}")
         return data
 
+    def get_game_shot_data(self, game_id: str, player_id: int) -> DataFrame:
+        """特定の試合のプレイヤーショットチャートを取得"""
+        return self._fetch_shot_chart_data(team_id=0, player_id=player_id, game_id=game_id)
 
-    def get_season_shot_data(self):
-        """
-        特定のシーズンの全試合のショットチャートデータを取得。
-
-        Returns:
-            DataFrame: シーズン全体のショットチャートデータ
-        """
-        response = shotchartdetail.ShotChartDetail(
-            team_id=0,
-            player_id=self.player_id,
-            season_nullable=self.season,
-            context_measure_simple='FGA'
-        )
-        data = response.get_data_frames()[0]
-        if data.empty:
-            raise ValueError("No games found for the given date.")
-        return data
+    def get_team_game_shot_data(self, game_id: str, team_id: int) -> DataFrame:
+        """特定の試合のチームショットチャートを取得"""
+        return self._fetch_shot_chart_data(team_id=team_id, player_id=0, game_id=game_id)

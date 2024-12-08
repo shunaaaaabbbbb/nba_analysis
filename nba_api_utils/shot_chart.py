@@ -25,7 +25,7 @@ class ShotChart:
         )
         data = response.get_data_frames()[0]
         if data.empty:
-            raise ValueError(f"No shot data found for season: {self.season}, game_id: {game_id}, team_id: {team_id}, player_id: {player_id}")
+            raise ValueError(f"No shot data found")
         return data
 
     def get_game_shot_data(self, game_id: str, player_id: int) -> DataFrame:

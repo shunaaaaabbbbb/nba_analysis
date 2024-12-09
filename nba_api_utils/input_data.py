@@ -3,24 +3,48 @@ from nba_api_utils.game import Game
 from nba_api_utils.team import Team
 import streamlit as st
 from datetime import timedelta
+import streamlit as st
+from nba_api_utils.seasons import get_season_list
 
 def input_season():
-    # シーズンの入力
-    season = st.text_input("シーズンを選択する (e.g., 2023-24):", "")
-    if not season:
-        st.stop()
-
+    """
+    シーズンを選択する。
+    Returns:
+        str: 選択されたシーズン（例: "2024-25"）
+    """
+    seasons = get_season_list()
+    season = st.selectbox("シーズンを選択してください:", seasons)
     return season
 
-def input_date():
-    # 日付の入力
+
+from datetime import datetime, timedelta
+import streamlit as st
+
+def input_date(season):
+    """
+    日付の入力を受け付ける。
+    シーズンの開始年の12月1日をデフォルト値に設定。
+    
+    Args:
+        season (str): 選択されたシーズン（例: "2024-25"）
+
+    Returns:
+        tuple: フォーマット済み日付文字列とdatetimeオブジェクト
+    """
+    # シーズンの開始年を取得
+    start_year = int(season.split("-")[0])
+
+    # 日付を選択
     date = st.date_input("日付を選択する (YYYY-MM-DD):")
     if not date:
         st.stop()
-    date = date - timedelta(days=1)  # Adjust date to the day before
-    formatted_date = date.strftime("%Y-%m-%d")
 
-    return formatted_date, date
+    # 日付をフォーマット
+    adjusted_date = date - timedelta(days=1)  # 前日の日付を計算
+    formatted_date = adjusted_date.strftime("%Y-%m-%d")
+
+    return formatted_date, adjusted_date
+
 
 def select_game_from_date(season, formatted_date):
     # 試合情報の取得
@@ -60,7 +84,7 @@ def select_player(game, game_id, selected_team):
 
 def select_player_by_game():
     season = input_season()
-    formatted_date, date = input_date()
+    formatted_date, date = input_date(season)
     game, game_id, selected_game = select_game_from_date(season, formatted_date)
     selected_team = select_team(game, game_id)
     selected_player_name = select_player(game, game_id, selected_team)
@@ -71,7 +95,7 @@ def select_player_by_game():
 
 def select_game():
     season = input_season()
-    formatted_date, date = input_date()
+    formatted_date, date = input_date(season)
     game, game_id, selected_game = select_game_from_date(season, formatted_date)
     selected_team = select_team(game, game_id)
 

@@ -3,7 +3,6 @@ from nba_api_utils.game import Game
 from nba_api_utils.team import Team
 import streamlit as st
 from datetime import timedelta
-import streamlit as st
 from nba_api_utils.seasons import get_season_list
 
 def input_season():

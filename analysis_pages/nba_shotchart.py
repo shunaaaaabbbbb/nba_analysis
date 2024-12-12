@@ -1,9 +1,11 @@
+# %%
 import streamlit as st
 from nba_api_utils.input_data import select_player_by_game, select_game
 from utils.visualizations import Visualizer
 from nba_api_utils.shot_chart import ShotChart
 from nba_api_utils.button import ButtonHandler
 
+# %%
 def select_mode():
     """
     ボタンを使用してモードを選択する。
@@ -11,7 +13,7 @@ def select_mode():
     button = ButtonHandler()
     mode = button.select_mode()
     return mode
-
+# %%
 def run_player_analysis(output_col):
     """
     プレイヤー単位のショットチャート分析。
@@ -23,7 +25,7 @@ def run_player_analysis(output_col):
         with output_col:
             visualizer = Visualizer(shot_chart_data, game, date)
             visualizer.plot_shot_chart_of_player(player_name)
-
+# %%
 def run_game_analysis(output_col):
     """
     チーム単位のショットチャート分析。
@@ -35,7 +37,7 @@ def run_game_analysis(output_col):
         with output_col:
             visualizer = Visualizer(shot_chart_data, game, date)
             visualizer.plot_shot_chart_of_game(team_name)
-
+# %%
 def run():
     """
     アプリケーションのエントリーポイント。

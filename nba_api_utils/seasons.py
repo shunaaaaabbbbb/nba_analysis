@@ -1,5 +1,6 @@
+# %%
 import datetime
-
+# %%
 def get_season_list():
     """
     現在の年を基準に、最新シーズンから古い順にNBAのシーズンリストを取得する。

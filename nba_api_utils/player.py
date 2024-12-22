@@ -12,20 +12,34 @@ class Player:
         Args:
             player_name (str): プレイヤーの名前
         """
-        self.name = player_name
-        self.id = self._get_player_id()
+        self.name = player_name  # プレイヤー名
+        self.id = self._get_player_id()  # プレイヤーid
 
-    def _get_player_id(self):
-        """
-        選手名からIDを取得
+    def _get_player_id(self) -> pd.DataFrame:
+        """選手名からIDを取得
+
+        Raises:
+            ValueError: プレイヤーidが見つからないエラー
+
+        Returns:
+            pd.DataFrame: プレイヤーのデータフレーム
         """
         player_info = players.find_players_by_full_name(self.name)
         if player_info:
             return player_info[0]["id"]
         else:
             raise ValueError(f"Player {self.name} not found.")
-    
-    def get_player_career_stats(self, player_id, stat_name):
+
+    def get_player_career_stats(self, player_id: int, stat_name: str) -> pd.DataFrame:
+        """プレイヤーのキャリアスタッツを返す
+
+        Args:
+            player_id (int): プレイヤーID
+            stat_name (str): 取得したいスタッツ名
+
+        Returns:
+            pd.DataFrame: プレイヤーのキャリアスタッツ
+        """
         # プレイヤーのキャリアスタッツを取得
         career = playercareerstats.PlayerCareerStats(player_id=player_id).get_data_frames()[0]
         career = career[['SEASON_ID', 'TEAM_ABBREVIATION', stat_name]]

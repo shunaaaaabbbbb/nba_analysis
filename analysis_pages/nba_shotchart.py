@@ -1,7 +1,7 @@
 # %%
 import streamlit as st
 from nba_api_utils.input_data import select_player_by_game, select_game
-from utils.visualizations import Visualizer
+from utils.visualizations import plot_shot_chart_of_game, plot_shot_chart_of_player
 from nba_api_utils.shot_chart import ShotChart
 from nba_api_utils.button import ButtonHandler
 
@@ -23,8 +23,7 @@ def run_player_analysis(output_col):
         shot_chart = ShotChart(season)
         shot_chart_data = shot_chart.get_game_shot_data(game_id, player_id)
         with output_col:
-            visualizer = Visualizer(shot_chart_data, game, date)
-            visualizer.plot_shot_chart_of_player(player_name)
+            plot_shot_chart_of_player(shot_chart_data, player_name, game, date)
 # %%
 def run_game_analysis(output_col):
     """
@@ -35,8 +34,7 @@ def run_game_analysis(output_col):
         shot_chart = ShotChart(season)
         shot_chart_data = shot_chart.get_team_game_shot_data(game_id, team_id)
         with output_col:
-            visualizer = Visualizer(shot_chart_data, game, date)
-            visualizer.plot_shot_chart_of_game(team_name)
+            plot_shot_chart_of_game(shot_chart_data, team_name, game, date)
 # %%
 def run():
     """

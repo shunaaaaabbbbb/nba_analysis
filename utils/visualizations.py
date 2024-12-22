@@ -151,8 +151,7 @@ def plot_cumulative_points_comparison(player_name1: str, player_name2: str, stat
         ),  # 欠場シーズンは透過させる
         hovertemplate='<b>Year: %{x}</b><br>%{y}<br>' +
                       '%{customdata}<extra></extra>',
-        customdata=["Played"
-                    if played else "Not Played"
+        customdata=["✔ Played"if played else "✖ Not Played"
                     for played in player_stats1['IS_PLAYED']
                     ]
     ))
@@ -171,8 +170,7 @@ def plot_cumulative_points_comparison(player_name1: str, player_name2: str, stat
         ),  # 欠場シーズンは透過させる
         hovertemplate='<b>Year: %{x}</b><br>%{y}<br>' +
                       '%{customdata}<extra></extra>',
-        customdata=["Played"
-                    if played else "Not Played"
+        customdata=["✔ Played"if played else "✖ Not Played"
                     for played in player_stats2['IS_PLAYED']
                     ]
     ))

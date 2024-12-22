@@ -28,9 +28,11 @@ class Player:
     def get_player_career_stats(self, player_id, stat_name):
         # プレイヤーのキャリアスタッツを取得
         career = playercareerstats.PlayerCareerStats(player_id=player_id).get_data_frames()[0]
-        career = career[['SEASON_ID', stat_name]]
-        # 同じSEASON_IDが複数ある場合、PTSを合計する
-        career = career.groupby('SEASON_ID', as_index=False).sum()
+        career = career[['SEASON_ID', 'TEAM_ABBREVIATION', stat_name]]
+       
+        # 同じSEASON_IDが複数ある場合、TEAM_ABBREVIATIONが"TOT"のデータを優先
+        career = career.sort_values(by=['SEASON_ID', 'TEAM_ABBREVIATION'], ascending=[True, False])
+        career = career.drop_duplicates(subset=['SEASON_ID'], keep='first')
 
         # SEASON_IDを数値型に変換
         career['SEASON_ID'] = career['SEASON_ID'].str[:4].astype(int)

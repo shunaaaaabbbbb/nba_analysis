@@ -144,7 +144,7 @@ def plot_cumulative_points_comparison(player_name1: str, player_name2: str, stat
         y=player_stats1[f'CUMULATIVE_{stat_name}'],
         name=f'{player_name1}',
         marker=dict(
-            color='gold',
+            color='skyblue',
             line=dict(color='black', width=1),
             opacity=[1.0 if played else 0.7
                     for played in player_stats1['IS_PLAYED']]
@@ -163,7 +163,7 @@ def plot_cumulative_points_comparison(player_name1: str, player_name2: str, stat
         y=player_stats2[f'CUMULATIVE_{stat_name}'],
         name=f'{player_name2}',
         marker=dict(
-            color='blue',
+            color='salmon',
             line=dict(color='black', width=1),
             opacity=[1.0 if played else 0.7
                     for played in player_stats2['IS_PLAYED']

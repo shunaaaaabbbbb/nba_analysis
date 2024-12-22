@@ -15,10 +15,6 @@ def input_season():
     season = st.selectbox("シーズンを選択してください:", seasons)
     return season
 
-
-from datetime import datetime, timedelta
-import streamlit as st
-
 def input_date(season):
     """
     日付の入力を受け付ける。

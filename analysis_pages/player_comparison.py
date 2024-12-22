@@ -4,6 +4,8 @@ from utils.visualizations import plot_cumulative_points_comparison
 
 def run():
     st.title("2人の選手の累積スタッツを比較してみよう！")
+    st.write("2人の選手と比較したいスタッツを入力したら、両選手のシーズンごとの累積スタッツを表す棒グラフが表示されます。")
+    st.header("")
     col1,col2 = st.columns([1,3])
     with col1:
         player_name1 = st.text_input("1人目の選手名を入力してください。",

@@ -43,7 +43,7 @@ class Player:
         # プレイヤーのキャリアスタッツを取得
         career = playercareerstats.PlayerCareerStats(player_id=player_id).get_data_frames()[0]
         career = career[['SEASON_ID', 'TEAM_ABBREVIATION', stat_name]]
-       
+
         # 同じSEASON_IDが複数ある場合、TEAM_ABBREVIATIONが"TOT"のデータを優先
         career = career.sort_values(by=['SEASON_ID', 'TEAM_ABBREVIATION'], ascending=[True, False])
         career = career.drop_duplicates(subset=['SEASON_ID'], keep='first')

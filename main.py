@@ -12,13 +12,13 @@ st.set_page_config(
 st.sidebar.title("分析機能")
 screen = st.sidebar.radio(
     "画面を選択してください:",
-    ["ショットチャート分析！", "プレイヤー比較", "シーズン統計"]
+    ["ショットチャート分析！", "プレイヤー比較！", "勝敗予測！"]
 )
 
 # 各画面を呼び出し
 if screen == "ショットチャート分析！":
     nba_shotchart.run()
-elif screen == "プレイヤー比較":
+elif screen == "プレイヤー比較！":
     player_comparison.run()
-elif screen == "シーズン統計":
+elif screen == "勝敗予測！":
     season_stats.run()

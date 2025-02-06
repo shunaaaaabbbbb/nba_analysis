@@ -201,3 +201,44 @@ def plot_cumulative_points_comparison(player_name1: str, player_name2: str, stat
     )
 
     st.plotly_chart(fig)
+
+
+def show_donuts_chart(stat, name, color):
+    fig = go.Figure(data=[go.Pie(
+        labels=['成功', '失敗'],
+        values=[stat, 100 - stat],
+        hole=0.6,
+        marker=dict(colors=[color, 'rgba(220, 220, 220, 0.5)']),
+        textinfo="none",
+        rotation=360 * stat * 0.01 if stat < 50 else 0
+    )])
+    fig.update_layout(
+        showlegend=False,
+        template="plotly_dark",
+        annotations=[
+            dict(text=f"{stat:.1f}%", x=0.5, y=0.5,
+                 font=dict(size=40, color="black", family="Arial Black"), showarrow=False),
+            dict(text=name, x=0.05, y=0.95,
+                 font=dict(size=40, color=color, family="Arial Black"), showarrow=False),
+        ],
+        width=500,
+        height=500,
+    )
+    st.plotly_chart(fig, use_container_width=True)
+
+
+def show_stats(stat, name, color):
+    if name == "GAME PLAYED":
+        st.markdown(
+            f'<div style="border: 4px solid {color}; padding: 15px; border-radius: 30px; background-color: #f9f9f9; text-align: center;">'
+            f'<h1 style="font-size: 50px; margin: 0; color: black;">{name}</h1>'
+            f'<h1 style="font-size: 50px; margin: 0; color: black;">{stat:.0f}</h1></div>',
+            unsafe_allow_html=True
+        )
+    else:
+        st.markdown(
+            f'<div style="border: 4px solid {color}; padding: 15px; border-radius: 30px; background-color: #f9f9f9; text-align: center;">'
+            f'<h1 style="font-size: 50px; margin: 0; color: black;">{name}</h1>'
+            f'<h1 style="font-size: 50px; margin: 0; color: black;">{stat:.1f}</h1></div>',
+            unsafe_allow_html=True
+        )

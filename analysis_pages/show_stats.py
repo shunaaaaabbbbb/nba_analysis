@@ -1,56 +1,20 @@
 import streamlit as st
-from nba_api.stats.static import players
-from nba_api.stats.endpoints import playercareerstats
 
+from nba_api_utils.player import PlayerManager, Player
 from utils.visualizations import show_donuts_chart, show_stats
-from utils.constants import TEAM_COLORS
+from utils.ui_helpers import select_player, select_season, get_season_stats
+from utils.helpers import get_color
 
 
-
-
-def _get_players_list():
-    player_list = players.get_players()
-    player_names = sorted([p["full_name"] for p in player_list])
-    player_dict = {p["full_name"]: p["id"] for p in player_list}
-    return player_names, player_dict
-
-def _select_player(player_names, player_dict):
-    player_name = st.selectbox("選手を選択してください", player_names, index=player_names.index("LeBron James"))
-    player_id = player_dict[player_name]
-    return player_id, player_name
-
-def _get_career_stats(player_id):
-    career_stats = playercareerstats.PlayerCareerStats(player_id=player_id)
-    return career_stats
-
-def _select_season(career_stats):
-    available_seasons = sorted(career_stats.get_data_frames()[0]['SEASON_ID'].unique(), reverse=True)
-    season = st.selectbox("シーズンを選択してください", available_seasons)
-    return season
-
-def _get_season_stats(career_stats, season):
-    stats_df = career_stats.get_data_frames()[0]
-    selected_season_stats = stats_df[stats_df['SEASON_ID'] == season]
-    if selected_season_stats.empty:
-        st.error(f"{season} シーズンのデータが見つかりません。")
-        return
-    if len(selected_season_stats) > 1:
-        selected_season_stats = selected_season_stats.tail(1)
-    return selected_season_stats
-
-def _get_color(selected_season_stats):
-    team_abbr = selected_season_stats.iloc[0]['TEAM_ABBREVIATION']
-    color = TEAM_COLORS.get(team_abbr, "gray") if team_abbr in TEAM_COLORS else "black"
-    return color
 
 def _calculate_stats(selected_season_stats):
     # 必要なデータを取得
     stats = {
-        "POINTS PER GAME": selected_season_stats.iloc[0]['PTS'] / selected_season_stats.iloc[0]['GP'],
-        "ASSIST PER GAME": selected_season_stats.iloc[0]['AST'] / selected_season_stats.iloc[0]['GP'],
-        "REBOUND PER GAME": selected_season_stats.iloc[0]['REB'] / selected_season_stats.iloc[0]['GP'],
-        "BLOCK PER GAME": selected_season_stats.iloc[0]['BLK'] / selected_season_stats.iloc[0]['GP'],
-        "STEAL PER GAME": selected_season_stats.iloc[0]['STL'] / selected_season_stats.iloc[0]['GP'],
+        "POINTS PER GAME": selected_season_stats.iloc[0]['PTS'] / selected_season_stats.iloc[0]['GP'] if selected_season_stats.iloc[0]['GP'] > 0 else 0,
+        "ASSIST PER GAME": selected_season_stats.iloc[0]['AST'] / selected_season_stats.iloc[0]['GP'] if selected_season_stats.iloc[0]['GP'] > 0 else 0,
+        "REBOUND PER GAME": selected_season_stats.iloc[0]['REB'] / selected_season_stats.iloc[0]['GP'] if selected_season_stats.iloc[0]['GP'] > 0 else 0,
+        "BLOCK PER GAME": selected_season_stats.iloc[0]['BLK'] / selected_season_stats.iloc[0]['GP'] if selected_season_stats.iloc[0]['GP'] > 0 else 0,
+        "STEAL PER GAME": selected_season_stats.iloc[0]['STL'] / selected_season_stats.iloc[0]['GP'] if selected_season_stats.iloc[0]['GP'] > 0 else 0,
         "GAME PLAYED": selected_season_stats.iloc[0]['GP']
     }
     percentages = {
@@ -61,12 +25,14 @@ def _calculate_stats(selected_season_stats):
     return stats, percentages
 
 def _get_user_input():
-    player_names, player_dict = _get_players_list()
-    player_id, player_name = _select_player(player_names, player_dict)
-    career_stats = _get_career_stats(player_id)
-    season = _select_season(career_stats)
-    selected_season_stats = _get_season_stats(career_stats, season)
-    color = _get_color(selected_season_stats)
+    manager = PlayerManager()
+    player_names = manager.player_names
+    player_name = select_player(player_names)
+    player = Player(player_name)
+    career_stats = player.get_player_career_stats(player.id)
+    season = select_season(career_stats)
+    selected_season_stats = get_season_stats(career_stats, season)
+    color = get_color(selected_season_stats)
     stats, percentages = _calculate_stats(selected_season_stats)
     return player_name, stats, color, percentages, season
 

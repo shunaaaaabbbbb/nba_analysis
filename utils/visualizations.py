@@ -10,6 +10,8 @@ import plotly.graph_objects as go
 from nba_api_utils.player import Player
 from nba_api_utils.game import Game
 
+from utils.helpers import get_player_stats, prepare_cumlative_stats, fill_missing_career_years
+
 def _draw_court(ax=None, color: str='black', lw: int=2):
     """バスケットコートを描画する
 
@@ -73,134 +75,67 @@ def plot_shot_chart(title: str, shot_chart_data: pd.DataFrame, date:datetime.dat
     # 軸を非表示にする
     ax.set_xticks([])  # x軸の目盛りを非表示
     ax.set_yticks([])  # y軸の目盛りを非表示
-    
+
     # タイトルと凡例
     if title == "player":
-        ax.set_title(f"Shot Chart for {player_name} ({game}: {date + timedelta(days=1)})",
-                     color='black', weight="bold", fontsize=20)
+        ax.set_title(
+            f"Shot Chart for {player_name} ({game}: {date + timedelta(days=1)})",
+            color='black', weight="bold", fontsize=20
+            )
         ax.legend(loc='lower right', fontsize=20)
+
     elif title == "game":
-        ax.set_title(f"Shot Chart for {team_name} ({game} : {date + timedelta(days=1)})",
-                     color='black', weight="bold", fontsize=20)
+        ax.set_title(
+            f"Shot Chart for {team_name} ({game} : {date + timedelta(days=1)})",
+            color='black', weight="bold", fontsize=20
+            )
         ax.legend(loc='lower right', fontsize=20)
 
     # Streamlitで表示
     st.pyplot(fig)
 
 
-def plot_cumulative_points_comparison(player_name1: str, player_name2: str, stat_name: str):
-    """2選手の累積棒グラフを描画する
 
-    Args:
-        player_name1 (str): 1人目の選手
-        player_name2 (str): 2人目の選手
-        stat_name (str): 比較したいスタッツ
-    """
-    # 比較したい2選手
-    player1 = Player(player_name1)
-    player2 = Player(player_name2)
-    
-    # 2選手のスタッツ
-    player_stats1 = player1.get_player_career_stats(player1.id, stat_name)
-    player_stats2 = player2.get_player_career_stats(player2.id, stat_name)
+def plot_cumulative_comparison(player1: Player, player2: Player, stat_name: str):
+    """2選手の累積スタッツを比較するグラフを描画"""
 
-    # 累積得点を計算
-    player_stats1[f'CUMULATIVE_{stat_name}'] = player_stats1[stat_name].cumsum()
-    player_stats2[f'CUMULATIVE_{stat_name}'] = player_stats2[stat_name].cumsum()
-    
-    # シーズンをキャリア年数に変換
-    max_career_length = max(len(player_stats1), len(player_stats2))
-    player_stats1['CAREER_YEAR'] = range(1, len(player_stats1) + 1)
-    player_stats2['CAREER_YEAR'] = range(1, len(player_stats2) + 1)
+    # データ取得
+    player_stats1 = get_player_stats(player1)
+    player_stats2 = get_player_stats(player2)
 
-    # 補完処理（短い方をゼロ埋めする）
-    if len(player_stats1) < max_career_length:
-        filler = max_career_length - len(player_stats1)
-        additional_rows = {
-            'CAREER_YEAR': range(len(player_stats1) + 1, max_career_length + 1),
-            f'CUMULATIVE_{stat_name}': 0 * filler
-        }
-        player_stats1 = pd.concat([player_stats1,
-                                   pd.DataFrame(additional_rows)],
-                                  ignore_index=True)
+    # 累積スタッツを計算
+    player_stats1 = prepare_cumlative_stats(player_stats1, stat_name)
+    player_stats2 = prepare_cumlative_stats(player_stats2, stat_name)
 
-    if len(player_stats2) < max_career_length:
-        filler = max_career_length - len(player_stats2)
-        additional_rows = {
-            'CAREER_YEAR': range(len(player_stats2) + 1, max_career_length + 1),
-            f'CUMULATIVE_{stat_name}': 0 * filler
-        }
-        player_stats2 = pd.concat([player_stats2,
-                                   pd.DataFrame(additional_rows)],
-                                  ignore_index=True
-                                  )
-    
+    # キャリアが短い方をゼロ埋め
+    player_stats1, player_stats2 = fill_missing_career_years(player_stats1, player_stats2, stat_name)
+
     # プロット
     fig = go.Figure()
 
-    # Player 1: 出場/非出場シーズンを1つのトレースにまとめる
-    fig.add_trace(go.Bar(
-        x=player_stats1['CAREER_YEAR'],
-        y=player_stats1[f'CUMULATIVE_{stat_name}'],
-        name=f'{player_name1}',
-        marker=dict(
-            color='skyblue',
-            line=dict(color='black', width=1),
-            opacity=[1.0 if played else 0.7
-                    for played in player_stats1['IS_PLAYED']]
-        ),  # 欠場シーズンは透過させる
-        hovertemplate='<b>Year: %{x}</b><br>%{y}<br>' +
-                      '%{customdata}<extra></extra>',
-        customdata=["✔ Played"if played else "✖ Not Played"
-                    for played in player_stats1['IS_PLAYED']
-                    ]
-    ))
+    for stats, player, color in [(player_stats1, player1, "skyblue"), (player_stats2, player2, "salmon")]:
+        fig.add_trace(go.Bar(
+            x=stats['CAREER_YEAR'],
+            y=stats[f'CUMULATIVE_{stat_name}'],
+            name=player.name,
+            marker=dict(
+                color=color,
+                line=dict(color='black', width=1),
+                opacity=[1.0 if played else 0.7 for played in stats['IS_PLAYED']]
+            ),
+            hovertemplate='<b>Year: %{x}</b><br>%{y}<br>%{customdata}<extra></extra>',
+            customdata=["✔ Played" if played else "✖ Not Played" for played in stats['IS_PLAYED']]
+        ))
 
-    # Player 2: 出場/非出場シーズンを1つのトレースにまとめる
-    fig.add_trace(go.Bar(
-        x=player_stats2['CAREER_YEAR'],
-        y=player_stats2[f'CUMULATIVE_{stat_name}'],
-        name=f'{player_name2}',
-        marker=dict(
-            color='salmon',
-            line=dict(color='black', width=1),
-            opacity=[1.0 if played else 0.7
-                    for played in player_stats2['IS_PLAYED']
-                    ]
-        ),  # 欠場シーズンは透過させる
-        hovertemplate='<b>Year: %{x}</b><br>%{y}<br>' +
-                      '%{customdata}<extra></extra>',
-        customdata=["✔ Played"if played else "✖ Not Played"
-                    for played in player_stats2['IS_PLAYED']
-                    ]
-    ))
-
-    
     fig.update_layout(
-        title=dict(
-            text=f'Cumulative {stat_name} Comparison: {player_name1} vs {player_name2}',
-            font=dict(size=20, color='black'),
-            x=0
-        ),
-        xaxis=dict(
-            title='Career Year',
-            titlefont=dict(size=16, color='black'),
-            tickfont=dict(size=14, color='black')
-        ),
-        yaxis=dict(
-            title=f'Cumulative {stat_name}',
-            titlefont=dict(size=16, color='black'),
-            tickfont=dict(size=14, color='black')
-        ),
-        legend=dict(
-            font=dict(size=14),
-            bgcolor='rgba(255,255,255,0.8)',
-            bordercolor='black',
-            borderwidth=1
-        ),
+        title=dict(text=f'Cumulative {stat_name} Comparison: {player1.name} vs {player2.name}', font=dict(size=20, color='black')),
+        xaxis=dict(title='Career Year', titlefont=dict(size=16, color='black'), tickfont=dict(size=14, color='black')),
+        yaxis=dict(title=f'Cumulative {stat_name}', titlefont=dict(size=16, color='black'), tickfont=dict(size=14, color='black')),
+        legend=dict(font=dict(size=14), bgcolor='rgba(255,255,255,0.8)', bordercolor='black', borderwidth=1),
     )
 
     st.plotly_chart(fig)
+
 
 
 def show_donuts_chart(stat, name, color):
@@ -216,10 +151,14 @@ def show_donuts_chart(stat, name, color):
         showlegend=False,
         template="plotly_dark",
         annotations=[
-            dict(text=f"{stat:.1f}%", x=0.5, y=0.5,
-                 font=dict(size=40, color="black", family="Arial Black"), showarrow=False),
-            dict(text=name, x=0.05, y=0.95,
-                 font=dict(size=40, color=color, family="Arial Black"), showarrow=False),
+            dict(
+                text=f"{stat:.1f}%", x=0.5, y=0.5,
+                font=dict(size=40, color="black", family="Arial Black"), showarrow=False
+                ),
+            dict(
+                text=name, x=0.05, y=0.95,
+                font=dict(size=40, color=color, family="Arial Black"), showarrow=False
+                ),
         ],
         width=500,
         height=500,

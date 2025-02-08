@@ -1,6 +1,19 @@
 import streamlit as st
 
-from utils.visualizations import plot_cumulative_points_comparison
+from nba_api_utils.player import PlayerManager, Player
+from utils.ui_helpers import select_player, select_stat
+from utils.visualizations import plot_cumulative_comparison
+
+
+def _get_user_input():
+    manager = PlayerManager()
+    player_names = manager.player_names
+    player_name1 = select_player(player_names, key = "player1")
+    player_name2 = select_player(player_names, key = "player2")
+    player1 = Player(player_name1)
+    player2 = Player(player_name2)
+    stat_name = select_stat()
+    return player1, player2, stat_name
 
 def run():
     st.title("2人の選手の累積スタッツを比較してみよう！")
@@ -8,35 +21,11 @@ def run():
     st.header("")
     col1,col2 = st.columns([1,3])
     with col1:
-        player_name1 = st.text_input("1人目の選手名を入力してください。",
-                                    "LeBron James")
-        player_name2 = st.text_input("2人目の選手名を入力してください。",
-                                    "Kareem Abdul-Jabbar")
-
-        stats_list = ["PTS（得点）",
-                      "AST（アシスト）",
-                      "REB（リバウンド）",
-                      "BLK（ブロック）",
-                      "OREB（オフェンスリバウンド）",
-                      "DREB（ディフェンスリバウンド）",
-                      "STL（スティール）",
-                      "TOV（ターンオーバー）",
-                      "PF（ファール）",
-                      "FGM（フィールドゴール成功数）",
-                      "FGA（フィールドゴール試投数）",
-                      "FG3M（3ポイント成功数）",
-                      "FG3A（3ポイント試投数）",
-                      "FTM（フリースロー成功数）",
-                      "FTA（フリースロー試投数）"
-                      ]
-
-        stat_name = st.selectbox("比較するスタッツを選択してください:",
-                                 stats_list)
-        stat_name = stat_name.split("（")[0]
+        player1, player2, stat_name = _get_user_input()
+        is_button = st.button("スタッツを見る")
 
     with col2:
-        if player_name1 and player_name2:
-            plot_cumulative_points_comparison(player_name1,
-                                              player_name2,
-                                              stat_name
-                                              )
+        if is_button:
+            plot_cumulative_comparison(
+                player1, player2,stat_name
+                )

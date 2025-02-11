@@ -1,20 +1,18 @@
-# %%
 import streamlit as st
 from nba_api_utils.input_data import select_player_by_game, select_game
 from utils.visualizations import plot_shot_chart
 from nba_api_utils.shot_chart import ShotChart
-from nba_api_utils.button import ButtonHandler
 
-# %%
-def select_mode():
+
+def _select_mode():
     """
     ボタンを使用してモードを選択する。
     """
-    button = ButtonHandler()
-    mode = button.select_mode()
+    mode = st.radio("表示モードを選択してください", ["プレイヤーのショットチャート", "チームのショットチャート"])
     return mode
-# %%
-def run_player_analysis(output_col):
+
+
+def _run_player_analysis(output_col):
     """
     プレイヤー単位のショットチャート分析。
     """
@@ -28,8 +26,8 @@ def run_player_analysis(output_col):
                             date=date, game=game,
                             player_name=player_name
                             )
-# %%
-def run_game_analysis(output_col):
+
+def _run_game_analysis(output_col):
     """
     チーム単位のショットチャート分析。
     """
@@ -43,7 +41,7 @@ def run_game_analysis(output_col):
                             date=date, game=game,
                             team_name=team_name
                             )
-# %%
+
 def run():
     """
     アプリケーションのエントリーポイント。
@@ -52,10 +50,10 @@ def run():
     # 左右のカラムを作成（1:1の比率）
     left_col, right_col = st.columns([1, 1])
     with left_col:
-        mode = select_mode()
+        mode = _select_mode()
         if mode == "プレイヤーのショットチャート":
-            run_player_analysis(right_col)
+            _run_player_analysis(right_col)
         elif mode == "チームのショットチャート":
-            run_game_analysis(right_col)
+            _run_game_analysis(right_col)
         else:
             st.error("モードが選択されていません。")

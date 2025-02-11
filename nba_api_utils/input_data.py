@@ -21,11 +21,11 @@ def input_season() -> str:
     return season
 
 
-def input_date(season) -> Tuple[datetime.datetime, datetime.datetime]:
+def input_date() -> Tuple[datetime.datetime, datetime.datetime]:
     """
     日付の入力を受け付ける。
     シーズンの開始年の12月1日をデフォルト値に設定。
-    
+
     Args:
         season (str): 選択されたシーズン（例: "2024-25"）
 
@@ -41,10 +41,10 @@ def input_date(season) -> Tuple[datetime.datetime, datetime.datetime]:
     adjusted_date = date - timedelta(days=1)  # 前日の日付を計算
     formatted_date = adjusted_date.strftime("%Y-%m-%d")
 
-    return formatted_date, adjusted_date
+    return formatted_date, adjusted_date, date
 
 
-def select_game_from_date(season: str, formatted_date: datetime.datetime) -> Tuple[Game, pd.DataFrame, str]:
+def select_game_from_date(season: str, date: datetime.datetime, formatted_date: datetime.datetime) -> Tuple[Game, pd.DataFrame, str]:
     """試合を選択する
 
     Args:
@@ -59,6 +59,7 @@ def select_game_from_date(season: str, formatted_date: datetime.datetime) -> Tup
     games_on_date = game.game_log
 
     if games_on_date.empty:
+        date = date.strftime("%Y-%m-%d")
         st.warning(f"{formatted_date}に行われた試合のデータは存在しません。")
         st.stop()
 
@@ -117,14 +118,13 @@ def select_player_by_game() -> Tuple[int, int, str, str, str, datetime.datetime]
         Tuple[int, int, str, str, str, datetime.datetime]: 試合、選手の情報
     """
     season = input_season()
-    formatted_date, date = input_date(season)
-    game, game_id, selected_game = select_game_from_date(season, formatted_date)
+    formatted_date, adjusted_date, date = input_date()
+    game, game_id, selected_game = select_game_from_date(season, date, formatted_date)
     selected_team = select_team(game, game_id)
     selected_player_name = select_player(game, game_id, selected_team)
 
     player = Player(selected_player_name)
-
-    return game_id, player.id, season, selected_player_name, selected_game, date
+    return game_id, player.id, season, selected_player_name, selected_game, adjusted_date
 
 
 def select_game() -> Tuple[int, int, str, str, str, datetime.datetime]:
@@ -134,10 +134,10 @@ def select_game() -> Tuple[int, int, str, str, str, datetime.datetime]:
         Tuple[int, int, str, Team, Game, datetime.datetime]: 試合の情報
     """
     season = input_season()
-    formatted_date, date = input_date(season)
-    game, game_id, selected_game = select_game_from_date(season, formatted_date)
+    formatted_date, adjusted_date, date = input_date()
+    game, game_id, selected_game = select_game_from_date(season, date, formatted_date)
     selected_team = select_team(game, game_id)
 
     team = Team(selected_team)
 
-    return game_id, team.id, season, selected_team, selected_game, date
+    return game_id, team.id, season, selected_team, selected_game, adjusted_date

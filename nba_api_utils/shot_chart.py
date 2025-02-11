@@ -1,6 +1,7 @@
 from pandas import DataFrame
 from nba_api.stats.endpoints import shotchartdetail
 
+import streamlit as st
 
 class ShotChart:
     def __init__(self, season: str):
@@ -25,7 +26,8 @@ class ShotChart:
         )
         data = response.get_data_frames()[0]
         if data.empty:
-            raise ValueError(f"No shot data found")
+            st.warning("ショットチャートデータが存在しません。")
+            st.stop()
         return data
 
     def get_game_shot_data(self, game_id: str, player_id: int) -> DataFrame:

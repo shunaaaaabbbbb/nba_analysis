@@ -40,63 +40,7 @@ def _draw_court(ax=None, color: str='black', lw: int=2):
         ax.add_patch(element)
 
 
-def plot_shot_chart(title: str, shot_chart_data: pd.DataFrame, date:datetime.datetime , game: Game, player_name: str=None, team_name: str=None):
-    """ショットチャートを描画する
-
-    Args:
-        title (str): チームかプレイヤーかを選ぶ
-        shot_chart_data (pd.DataFrame): ショットチャート
-        date (datetime.datetime): 試合の日付
-        game (Game): 試合
-        player_name (str, optional): プレイヤー名. Defaults to None.
-        team_name (str, optional): チーム名. Defaults to None.
-    """
-    # 成功と失敗のシュート座標を描画
-    x_made = shot_chart_data[shot_chart_data['SHOT_MADE_FLAG'] == 1]['LOC_X']
-    y_made = shot_chart_data[shot_chart_data['SHOT_MADE_FLAG'] == 1]['LOC_Y']
-    x_missed = shot_chart_data[shot_chart_data['SHOT_MADE_FLAG'] == 0]['LOC_X']
-    y_missed = shot_chart_data[shot_chart_data['SHOT_MADE_FLAG'] == 0]['LOC_Y']
-
-    # プロットの準備
-    fig, ax = plt.subplots(figsize=(12, 11))
-    ax.set_facecolor('black')
-
-    # 成功と失敗のシュートをプロット
-    ax.scatter(x_made, y_made, c='turquoise', alpha=1, label='Made Shot', s=100)
-    ax.scatter(x_missed, y_missed, c='deeppink', alpha=1, label='Missed Shot', s=100)
-
-    # コートを描画
-    _draw_court(ax=ax, color='white')
-
-    # 軸の設定
-    ax.set_xlim(-250, 250)
-    ax.set_ylim(422.5, -47.5)
-
-    # 軸を非表示にする
-    ax.set_xticks([])  # x軸の目盛りを非表示
-    ax.set_yticks([])  # y軸の目盛りを非表示
-
-    # タイトルと凡例
-    if title == "player":
-        ax.set_title(
-            f"Shot Chart for {player_name} ({game}: {date + timedelta(days=1)})",
-            color='black', weight="bold", fontsize=20
-            )
-        ax.legend(loc='lower right', fontsize=20)
-
-    elif title == "game":
-        ax.set_title(
-            f"Shot Chart for {team_name} ({game} : {date + timedelta(days=1)})",
-            color='black', weight="bold", fontsize=20
-            )
-        ax.legend(loc='lower right', fontsize=20)
-
-    # Streamlitで表示
-    st.pyplot(fig)
-
-
-
-def plot_cumulative_comparison(player1: Player, player2: Player, stat_name: str):
+def plot_cumulative_comparison(player1: Player, player2: Player, stat_name: str, color1: str, color2: str):
     """2選手の累積スタッツを比較するグラフを描画"""
 
     # データ取得
@@ -113,7 +57,7 @@ def plot_cumulative_comparison(player1: Player, player2: Player, stat_name: str)
     # プロット
     fig = go.Figure()
 
-    for stats, player, color in [(player_stats1, player1, "skyblue"), (player_stats2, player2, "salmon")]:
+    for stats, player, color in [(player_stats1, player1, color1), (player_stats2, player2, color2)]:
         fig.add_trace(go.Bar(
             x=stats['CAREER_YEAR'],
             y=stats[f'CUMULATIVE_{stat_name}'],

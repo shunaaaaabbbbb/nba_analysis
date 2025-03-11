@@ -24,13 +24,10 @@ def input_season() -> str:
 def input_date() -> Tuple[datetime.datetime, datetime.datetime]:
     """
     日付の入力を受け付ける。
-    シーズンの開始年の12月1日をデフォルト値に設定。
 
-    Args:
-        season (str): 選択されたシーズン（例: "2024-25"）
 
     Returns:
-        tuple: フォーマット済み日付文字列とdatetimeオブジェクト
+        tuple: datetimeオブジェクト
     """
     # 日付を選択
     date = st.date_input("日付を選択する (YYYY-MM-DD):")
@@ -39,12 +36,11 @@ def input_date() -> Tuple[datetime.datetime, datetime.datetime]:
 
     # 日付をフォーマット
     adjusted_date = date - timedelta(days=1)  # 前日の日付を計算
-    formatted_date = adjusted_date.strftime("%Y-%m-%d")
 
-    return formatted_date, adjusted_date, date
+    return adjusted_date, date
 
 
-def select_game_from_date(season: str, date: datetime.datetime, formatted_date: datetime.datetime) -> Tuple[Game, pd.DataFrame, str]:
+def select_game_from_date(season: str, date: datetime.datetime, adjusted_date: datetime.datetime) -> Tuple[Game, pd.DataFrame, str]:
     """試合を選択する
 
     Args:
@@ -54,13 +50,14 @@ def select_game_from_date(season: str, date: datetime.datetime, formatted_date: 
     Returns:
         Tuple[Game, pd.DataFrame, str]: 選択した試合
     """
+    formatted_date = adjusted_date.strftime("%Y-%m-%d")
+
     # 試合情報の取得
     game = Game(season, formatted_date)
     games_on_date = game.game_log
 
     if games_on_date.empty:
-        date = date.strftime("%Y-%m-%d")
-        st.warning(f"{formatted_date}に行われた試合のデータは存在しません。")
+        st.warning(f"{date}に行われた試合のデータは存在しません。")
         st.stop()
 
     # 試合選択
@@ -118,8 +115,8 @@ def select_player_by_game() -> Tuple[int, int, str, str, str, datetime.datetime]
         Tuple[int, int, str, str, str, datetime.datetime]: 試合、選手の情報
     """
     season = input_season()
-    formatted_date, adjusted_date, date = input_date()
-    game, game_id, selected_game = select_game_from_date(season, date, formatted_date)
+    adjusted_date, date = input_date()
+    game, game_id, selected_game = select_game_from_date(season, date, adjusted_date)
     selected_team = select_team(game, game_id)
     selected_player_name = select_player(game, game_id, selected_team)
 
@@ -134,10 +131,13 @@ def select_game() -> Tuple[int, int, str, str, str, datetime.datetime]:
         Tuple[int, int, str, Team, Game, datetime.datetime]: 試合の情報
     """
     season = input_season()
-    formatted_date, adjusted_date, date = input_date()
-    game, game_id, selected_game = select_game_from_date(season, date, formatted_date)
+    adjusted_date, date = input_date()
+    game, game_id, selected_game = select_game_from_date(season, date, adjusted_date)
     selected_team = select_team(game, game_id)
 
     team = Team(selected_team)
-
-    return game_id, team.id, season, selected_team, selected_game, adjusted_date
+    if team.id == None:
+        st.warning(f" {team.name} が存在しません")
+        st.stop()
+    else:
+        return game_id, team.id, season, selected_team, selected_game, adjusted_date

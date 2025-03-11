@@ -39,30 +39,53 @@ def _draw_court(ax=None, color: str='black', lw: int=2):
     for element in court_elements:
         ax.add_patch(element)
 
-def plot_shot_chart(title: str, shot_chart_data: pd.DataFrame, date:datetime.datetime , game: Game, player_name: str=None, team_name: str=None):
+def plot_shot_chart(title: str, shot_chart_data: pd.DataFrame, date: datetime.datetime, game: Game, player_name: str = None, team_name: str = None):
     """ショットチャートを描画する
 
     Args:
-        title (str): チームかプレイヤーかを選ぶ
-        shot_chart_data (pd.DataFrame): ショットチャート
+        title (str): "player"ならプレイヤー、"game"ならチームのショットチャート
+        shot_chart_data (pd.DataFrame): ショットチャートデータ
         date (datetime.datetime): 試合の日付
-        game (Game): 試合
-        player_name (str, optional): プレイヤー名. Defaults to None.
-        team_name (str, optional): チーム名. Defaults to None.
+        game (Game): 試合オブジェクト
+        player_name (str, optional): プレイヤー名。デフォルトはNone
+        team_name (str, optional): チーム名。デフォルトはNone
     """
-    # 成功と失敗のシュート座標を描画
-    x_made = shot_chart_data[shot_chart_data['SHOT_MADE_FLAG'] == 1]['LOC_X']
-    y_made = shot_chart_data[shot_chart_data['SHOT_MADE_FLAG'] == 1]['LOC_Y']
-    x_missed = shot_chart_data[shot_chart_data['SHOT_MADE_FLAG'] == 0]['LOC_X']
-    y_missed = shot_chart_data[shot_chart_data['SHOT_MADE_FLAG'] == 0]['LOC_Y']
-
+    # データがない場合は早期リターン
+    if shot_chart_data.empty:
+        return
     # プロットの準備
     fig, ax = plt.subplots(figsize=(12, 11))
     ax.set_facecolor('black')
 
-    # 成功と失敗のシュートをプロット
-    ax.scatter(x_made, y_made, c='turquoise', alpha=1, label='Made Shot', s=100)
-    ax.scatter(x_missed, y_missed, c='deeppink', alpha=1, label='Missed Shot', s=100)
+    # 成功したショット (青色の円)
+    made_shots = shot_chart_data[shot_chart_data['SHOT_MADE_FLAG'] == 1]
+    made_count = len(made_shots)
+
+    if not made_shots.empty:
+        ax.scatter(
+            made_shots['LOC_X'],
+            made_shots['LOC_Y'],
+            c='#3498db',  # 青色
+            s=100,
+            marker='o',
+            edgecolors='white',
+            label=f'Made ({made_count})'
+        )
+
+    # 失敗したショット (赤色のX)
+    missed_shots = shot_chart_data[shot_chart_data['SHOT_MADE_FLAG'] == 0]
+    missed_count = len(missed_shots)
+
+    if not missed_shots.empty:
+        ax.scatter(
+            missed_shots['LOC_X'],
+            missed_shots['LOC_Y'],
+            c='#e74c3c',  # 赤色
+            s=100,
+            marker='x',
+            linewidths=2,
+            label=f'Missed ({missed_count})'
+        )
 
     # コートを描画
     _draw_court(ax=ax, color='white')
@@ -70,20 +93,30 @@ def plot_shot_chart(title: str, shot_chart_data: pd.DataFrame, date:datetime.dat
     # 軸の設定
     ax.set_xlim(-250, 250)
     ax.set_ylim(422.5, -47.5)
-
-    # 軸を非表示にする
     ax.set_xticks([])  # x軸の目盛りを非表示
     ax.set_yticks([])  # y軸の目盛りを非表示
-    
-    # タイトルと凡例
+
+    # タイトル設定
+    display_date = date + timedelta(days=1)
+
     if title == "player":
-        ax.set_title(f"Shot Chart for {player_name} ({game}: {date + timedelta(days=1)})",
-                     color='black', weight="bold", fontsize=20)
-        ax.legend(loc='lower right', fontsize=20)
+        ax.set_title(
+            f"Shot Chart: {player_name} ({game}: {display_date})",
+            color='black', weight="bold", fontsize=20
+        )
     elif title == "game":
-        ax.set_title(f"Shot Chart for {team_name} ({game} : {date + timedelta(days=1)})",
-                     color='black', weight="bold", fontsize=20)
-        ax.legend(loc='lower right', fontsize=20)
+        ax.set_title(
+            f"Shot Chart: {team_name} ({game}: {display_date})",
+            color='black', weight="bold", fontsize=20
+        )
+
+    # 凡例を追加
+    ax.legend(
+        loc='lower right',
+        fontsize=12,
+        framealpha=0.7,
+        edgecolor='white'
+    )
 
     # Streamlitで表示
     st.pyplot(fig)

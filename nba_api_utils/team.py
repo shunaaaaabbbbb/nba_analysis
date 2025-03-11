@@ -21,4 +21,4 @@ class Team:
         if team_info:
             return team_info[0]["id"]
         else:
-            raise ValueError(f"Team {self.name} not found.")
+            return None

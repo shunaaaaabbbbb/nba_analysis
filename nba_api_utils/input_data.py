@@ -120,7 +120,7 @@ def select_player_by_game() -> Tuple[int, int, str, str, str, datetime.datetime]
     selected_team = select_team(game, game_id)
     selected_player_name = select_player(game, game_id, selected_team)
 
-    player = Player(selected_player_name)
+    player = Player(selected_player_name, game_id)
     return game_id, player.id, season, selected_player_name, selected_game, adjusted_date
 
 

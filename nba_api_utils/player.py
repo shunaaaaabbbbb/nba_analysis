@@ -1,5 +1,5 @@
 from nba_api.stats.static import players
-from nba_api.stats.endpoints import playercareerstats
+from nba_api.stats.endpoints import playercareerstats, boxscoretraditionalv3
 import pandas as pd
 
 
@@ -17,16 +17,16 @@ class Player:
     """
     選手に関するクラス
     """
-    def __init__(self, player_name: str):
+    def __init__(self, player_name: str, game_id: int):
         """初期設定
 
         Args:
             player_name (str): プレイヤーの名前
         """
         self.name = player_name  # プレイヤー名
-        self.id = self._get_player_id()  # プレイヤーid
+        self.id = self._get_player_id(game_id=game_id)  # プレイヤーid
 
-    def _get_player_id(self) -> pd.DataFrame:
+    def _get_player_id(self, game_id: int) -> pd.DataFrame:
         """選手名からIDを取得
 
         Raises:
@@ -35,11 +35,11 @@ class Player:
         Returns:
             pd.DataFrame: プレイヤーのデータフレーム
         """
-        player_info = players.find_players_by_full_name(self.name)
-        if player_info:
-            return player_info[0]["id"]
-        else:
-            raise ValueError(f"Player {self.name} not found.")
+        box_score = boxscoretraditionalv3.BoxScoreTraditionalV3(game_id=game_id)
+        players_info = box_score.get_data_frames()[0]
+        player_id = players_info[players_info["playerSlug"] == self.name]["personId"]
+
+        return player_id
 
 
     def get_player_career_stats(self, player_id: int) -> pd.DataFrame:

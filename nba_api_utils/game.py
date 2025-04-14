@@ -1,4 +1,4 @@
-from nba_api.stats.endpoints import leaguegamelog, boxscoretraditionalv2
+from nba_api.stats.endpoints import leaguegamelog, boxscoretraditionalv3
 
 class Game:
     """
@@ -27,9 +27,10 @@ class Game:
         """
         試合IDから参加チームを取得
         """
-        boxscore = boxscoretraditionalv2.BoxScoreTraditionalV2(game_id=game_id)
+        boxscore = boxscoretraditionalv3.BoxScoreTraditionalV3(game_id=game_id)
         game_stats = boxscore.get_data_frames()[0]
-        return game_stats["TEAM_ABBREVIATION"].unique()
+
+        return game_stats["teamTricode"].unique()
     
     
     def get_player_names(self, game_id: int, team: str):
@@ -42,7 +43,7 @@ class Game:
         Returns:
             _type_: _description_
         """
-        boxscore = boxscoretraditionalv2.BoxScoreTraditionalV2(game_id=game_id)
+        boxscore = boxscoretraditionalv3.BoxScoreTraditionalV3(game_id=game_id)
         game_stats = boxscore.get_data_frames()[0]
-        player_names = game_stats[game_stats["TEAM_ABBREVIATION"] == team]["PLAYER_NAME"]
+        player_names = game_stats[game_stats["teamTricode"] == team]["playerSlug"]
         return player_names.sort_values().tolist()
